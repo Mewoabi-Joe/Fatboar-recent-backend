@@ -1,0 +1,38 @@
+debug = true
+checkNewVersion = true
+logLevel = "ERROR"
+defaultEntryPoints = ["https","http"]
+
+[entryPoints]
+  [entryPoints.http]
+    address = ":80"
+  [entryPoints.http.redirect]
+    regex = "^http://(www\\.)?(localhost)/(.*)"
+    replacement="https://$2/$3"
+    permanent = true # redirect permanently
+  [entryPoints.https]
+    address = ":443"
+  [entryPoints.https.tls]
+
+[web]
+# Port for the status page
+address = ":8080"
+
+[docker]
+endpoint = "unix:///var/run/docker.sock"
+domain = "localhost"
+watch = true
+exposedbydefault = false
+
+[file]
+[backends]
+  [backends.web-localhost]
+    [backends.web-localhost.servers.server1]
+      url = "http://10.0.0.100"
+[frontends]
+  [frontends.web-localhost]
+  entryPoints = ["http", "https"]
+  backend = "web-localhost"
+  passHostHeader = true
+    [frontends.web-localhost.routes.server1]
+    rule = "Host: localhost"

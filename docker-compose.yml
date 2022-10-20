@@ -1,0 +1,57 @@
+version: "3"
+services:
+  api:
+    container_name: ${ENV_NAME}-api
+    build:
+      context: .
+      dockerfile: ./src/microservices/api/Dockerfile.debug
+    env_file:
+      - .env
+    links:
+      - mongo
+    volumes:
+      - ${DATA_HOST_PATH}:${DATA_PATH}
+      - ${LOGS_HOST_PATH}:${LOGS_PATH}
+      - ${SSL_HOST_PATH}:${SSL_PATH}
+      # code (dev)
+      - ./src/common:/app/src/common
+      - ./src/microservices/api:/app/src/microservices/api
+    ports:
+      - ${API_HOST_PORT}:3000
+      - ${API_HELTHCHECK_PORT}:5000
+
+
+  mongo:
+    container_name: mongo
+    image: aashreys/mongo-auth:latest
+    volumes:
+      - ./tmp/images/mongo/data:/data/db
+    environment:
+      - AUTH=yes
+      - MONGODB_ADMIN_USER=fatbordadmin
+      - MONGODB_ADMIN_PASS=aze123
+      - MONGODB_APPLICATION_DATABASE=fatbord_burger
+      - MONGODB_APPLICATION_USER=fatbord
+      - MONGODB_APPLICATION_PASS=aze123
+    ports:
+      - "27017:27017"
+  forest:
+    container_name: ${ENV_NAME}-forest
+    build:
+      context: .
+      dockerfile: ./src/microservices/forest/Dockerfile.debug
+    env_file:
+      - .env
+    links:
+      - mongo
+    volumes:
+      - ${DATA_HOST_PATH}:${DATA_PATH}
+      - ${LOGS_HOST_PATH}:${LOGS_PATH}
+      - ${SSL_HOST_PATH}:${SSL_PATH}
+      # code (dev)
+      - ./src/common:/app/src/common
+      - ./src/microservices/forest:/app/src/microservices/forest
+    ports:
+      - ${FOREST_HOST_PORT}:3000
+      - ${FOREST_HELTHCHECK_PORT}:5000
+

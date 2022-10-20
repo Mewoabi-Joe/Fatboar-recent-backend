@@ -1,0 +1,84 @@
+version: "3.7"
+networks:
+  traefik-public:
+    external: true
+volumes:
+  mongo-data:
+    driver: local
+  api-data:
+    driver: local
+  api-logs:
+    driver: local
+  forest-data:
+    driver: local
+  forest-logs:
+    driver: local
+services:
+  apiJs:
+    image : ${IMAGE?Variable not set}:${VERSION?Variable not set}
+    depends_on:
+      - mongoDb
+    networks:
+      - traefik-public
+    volumes:
+      - api-data:/srv/data
+      - api-logs:/srv/logs
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.apiJs.rule=Host(`api.fatboar.fr`)"
+        - "traefik.http.routers.apiJs.service=apiJs"
+        - "traefik.http.services.apiJs.loadbalancer.server.port=3000"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.http.routers.apiJs.entrypoints=web"
+        - "traefik.http.routers.apiJs.tls.certresolver=le"
+        - "traefik.http.routers.apiJs.entrypoints=websecure"
+  forestProd:
+      image: ${Forest_IMAGE?Variable not set}:${VERSION?Variable not set}
+      depends_on:
+        - mongoDb
+      networks:
+        - traefik-public
+      volumes:
+        - forest-data:/data
+        - forest-logs:/logs
+      ports:
+        - "5000:3000"
+      deploy:
+        mode: replicated
+        replicas: 1
+        update_config:
+          parallelism: 1
+          delay: 10s
+        labels:
+          - "traefik.enable=true"
+          - "traefik.http.routers.forestProd.rule=Host(`forest.fatboar.fr`)"
+          - "traefik.http.routers.forestProd.service=forestProd"
+          - "traefik.http.services.forestProd.loadbalancer.server.port=3000"
+          - "traefik.docker.network=traefik-public"
+          - "traefik.http.routers.forestProd.entrypoints=web"
+          - "traefik.http.routers.forestProd.tls.certresolver=le"
+          - "traefik.http.routers.forestProd.entrypoints=websecure"
+  mongoDb:
+    image: aashreys/mongo-auth:latest
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - traefik-public
+    environment:
+      - AUTH=yes
+      - MONGODB_ADMIN_USER=fatbordadmin
+      - MONGODB_ADMIN_PASS=aze123
+      - MONGODB_APPLICATION_DATABASE=fatbord_burger
+      - MONGODB_APPLICATION_USER=fatbord
+      - MONGODB_APPLICATION_PASS=aze123
+    ports:
+      - "27018:27017"
+
+
+
