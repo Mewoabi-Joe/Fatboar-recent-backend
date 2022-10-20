@@ -23,7 +23,8 @@ module.exports = (ms) => {
             hostName = staging_host;
             //Initially line below was  absent
             // mongoUrl = `mongodb+srv://${user}:${password}@final-db.acehnqi.mongodb.net/?retryWrites=true&w=majority`;
-            mongoUrl = `mongodb+srv://${user}:${password}@burgercluster.3bkb75m.mongodb.net/burgerdb?retryWrites=true&w=majority`;
+            // mongoUrl = `mongodb+srv://${user}:${password}@burgercluster.3bkb75m.mongodb.net/burgerdb?retryWrites=true&w=majority`;
+            mongoUrl = `mongodb+srv://${user}:${password}@cluster0.iyzanqc.mongodb.net/?retryWrites=true&w=majority`;
         }
         if (node_env === 'prod') {
             hostName = prod_host;
