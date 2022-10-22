@@ -8,7 +8,8 @@ module.exports = (ms) => {
     try {
         logger.info('[MONGOOSE] Connection to mongodb');
         const node_env = CONFIG.node_env;
-        const { host, staging_host, prod_host, port, db, user, password } = CONFIG.authentication_credentials.mongodb;
+        const { host, staging_host, prod_host, port, db, user, password, serverIpAddress } =
+            CONFIG.authentication_credentials.mongodb;
 
         //Initially line of code below was absent
         let mongoUrl;
@@ -21,10 +22,8 @@ module.exports = (ms) => {
         }
         if (node_env === 'dev') {
             hostName = staging_host;
-            //Initially line below was  absent
-            // mongoUrl = `mongodb+srv://${user}:${password}@final-db.acehnqi.mongodb.net/?retryWrites=true&w=majority`;
-            // mongoUrl = `mongodb+srv://${user}:${password}@burgercluster.3bkb75m.mongodb.net/burgerdb?retryWrites=true&w=majority`;
-            mongoUrl = `mongodb+srv://${user}:${password}@cluster0.iyzanqc.mongodb.net/?retryWrites=true&w=majority`;
+            // mongoUrl = `mongodb+srv://${user}:${password}@cluster0.iyzanqc.mongodb.net/?retryWrites=true&w=majority`;
+            mongoUrl = `mongodb://${user}:${password}@${serverIpAddress}:${port}/${db}?authSource=admin`;
         }
         if (node_env === 'prod') {
             hostName = prod_host;
